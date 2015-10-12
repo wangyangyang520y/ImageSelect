@@ -49,6 +49,7 @@ typedef enum {
 
 @property(nonatomic,strong) NSArray *albumAndAssetArray;
 
+@property(nonatomic,assign) BOOL isPreviewImage;
 
 @end
 
@@ -56,12 +57,13 @@ static NSString *identity = @"collection_cell";
 
 @implementation ImagePopupActionView
 
--(instancetype)initWithFrame:(CGRect)frame withViewController:(UIViewController *)viewController
+-(instancetype)initWithFrame:(CGRect)frame withViewController:(UIViewController *)viewController previewImage:(BOOL)isPreviewImage
 {
     self = [super initWithFrame:frame];
     if (self) {
         self.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.0];
         self.viewController = viewController;
+        self.isPreviewImage = isPreviewImage;
         btnAlbumActionType = BtnAlbumAction_openAlbum;
         self.window = [[UIApplication sharedApplication].windows lastObject];
         
@@ -76,22 +78,23 @@ static NSString *identity = @"collection_cell";
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             [BBMAlbumAssetTool getAllAlbumAndAssetsComplete:^(NSArray *dataArray) {
                 self.albumAndAssetArray = dataArray;
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    NSArray *tempArray = ((NSDictionary *)self.albumAndAssetArray[0])[BBMAssetAlbumPhotosArr];
-                    if (tempArray.count>defaultMaxShowImageNumber) {
-                        [self setImages:[tempArray subarrayWithRange:NSMakeRange(tempArray.count-defaultMaxShowImageNumber, defaultMaxShowImageNumber)]];
-                    }else{
-                        [self setImages:tempArray];
-                    }
-                    
-                });
+                if (self.isPreviewImage) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        NSArray *tempArray = ((NSDictionary *)self.albumAndAssetArray[0])[BBMAssetAlbumPhotosArr];
+                        if (tempArray.count>defaultMaxShowImageNumber) {
+                            [self setImages:[tempArray subarrayWithRange:NSMakeRange(tempArray.count-defaultMaxShowImageNumber, defaultMaxShowImageNumber)]];
+                        }else{
+                            [self setImages:tempArray];
+                        }
+                        
+                    });
+                }
             } albumAuthorizationFail:^{
                 
             }];
         });
         
         [self setUpView];
-        [self setUpConstraint];
     }
     return self;
 }
@@ -110,11 +113,13 @@ static NSString *identity = @"collection_cell";
     self.contentView.backgroundColor = [UIColor colorWithRed:243/255.0 green:243/255.0 blue:243/255.0 alpha:1];
     [self addSubview:self.contentView];
     
-    self.scrollView = [[UIScrollView alloc] init];
-    self.scrollView.translatesAutoresizingMaskIntoConstraints = NO;
-    self.scrollView.showsHorizontalScrollIndicator = NO;
-    self.scrollView.backgroundColor = [UIColor whiteColor];
-    [self.contentView addSubview:self.scrollView];
+    if (self.isPreviewImage) {
+        self.scrollView = [[UIScrollView alloc] init];
+        self.scrollView.translatesAutoresizingMaskIntoConstraints = NO;
+        self.scrollView.showsHorizontalScrollIndicator = NO;
+        self.scrollView.backgroundColor = [UIColor whiteColor];
+        [self.contentView addSubview:self.scrollView];
+    }
     
     self.btnAlbum = [UIButton buttonWithType:UIButtonTypeCustom];
     self.btnAlbum.translatesAutoresizingMaskIntoConstraints = NO;
@@ -139,6 +144,8 @@ static NSString *identity = @"collection_cell";
     [self.btnCancel addTarget:self action:@selector(btnCancelAction:) forControlEvents:UIControlEventTouchUpInside];
     [self.btnCancel setBackgroundColor:[UIColor whiteColor]];
     [self.contentView addSubview:self.btnCancel];
+    
+    [self setUpConstraint];
 }
 
 -(void)setUpConstraint
@@ -146,17 +153,18 @@ static NSString *identity = @"collection_cell";
     self.contentViewConstraintV = [NSLayoutConstraint constraintWithItem:self.contentView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1 constant:0];
     [self addConstraint:self.contentViewConstraintV];
     
-    [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[_scrollView]-0-|" options:NSLayoutFormatAlignAllTop metrics:nil views:NSDictionaryOfVariableBindings(_scrollView)]];
-    
     [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[_btnAlbum]-0-|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_btnAlbum)]];
     [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[_btnTokePhoto]-0-|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_btnTokePhoto)]];
     [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[_btnCancel]-0-|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_btnCancel)]];
     
-    [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[_scrollView(==height)]-5-[_btnAlbum(==40)]-0.5-[_btnTokePhoto(==40)]-5-[_btnCancel(==40)]-0-|" options:0 metrics:@{@"height":@(defaultImageHeight+10)} views:NSDictionaryOfVariableBindings(_scrollView,_btnAlbum,_btnTokePhoto,_btnCancel)]];
-    
     [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[_contentView]-0-|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_contentView)]];
     
-    
+    if(self.isPreviewImage){
+        [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[_scrollView]-0-|" options:NSLayoutFormatAlignAllTop metrics:nil views:NSDictionaryOfVariableBindings(_scrollView)]];
+        [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[_scrollView(==height)]-5-[_btnAlbum(==40)]-0.5-[_btnTokePhoto(==40)]-5-[_btnCancel(==40)]-0-|" options:0 metrics:@{@"height":@(defaultImageHeight+10)} views:NSDictionaryOfVariableBindings(_scrollView,_btnAlbum,_btnTokePhoto,_btnCancel)]];
+    }else{
+        [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[_btnAlbum(==40)]-0.5-[_btnTokePhoto(==40)]-5-[_btnCancel(==40)]-0-|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_btnAlbum,_btnTokePhoto,_btnCancel)]];
+    }
 }
 
 #pragma mark - 设置初始化图片数组
@@ -328,12 +336,12 @@ static NSString *identity = @"collection_cell";
             [self dismissWithCompletion:^{
                 
             }];
-            if ([self.delegate respondsToSelector:@selector(selectedImage:)]) {
+            if ([self.delegate respondsToSelector:@selector(imagePopupActionView:selectedImage:)]) {
                 NSMutableArray *tempArray = [[NSMutableArray alloc] init];
                 for (PhtotObj *photoObj in self.selectedImageArray) {
                     [tempArray addObject:[UIImage imageWithCGImage:[photoObj.asset defaultRepresentation].fullScreenImage]];
                 }
-                [self.delegate selectedImage:tempArray];
+                [self.delegate imagePopupActionView:self selectedImage:tempArray];
             }
         }
             break;
@@ -392,10 +400,7 @@ static NSString *identity = @"collection_cell";
     photoVc.dataArr = tempDataArray;
     
     [nav pushViewController:photoVc animated:NO];
-    photoVc.navigationItem.backBarButtonItem.title = @"相册";
-//    NSMutableArray *tempVcs = [NSMutableArray arrayWithArray:nav.viewControllers];
-//    [tempVcs addObject:photoVc];
-//    nav.viewControllers = tempVcs;
+//    photoVc.navigationItem.backBarButtonItem.title = @"相册";
     [self.viewController presentViewController:nav animated:YES completion:^{
         
     }];
@@ -446,6 +451,8 @@ static NSString *identity = @"collection_cell";
     [self.btnAlbum setTitle:@"相册" forState:UIControlStateNormal];
     [self.btnAlbum setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     btnAlbumActionType = BtnAlbumAction_openAlbum;
+    
+    [self.scrollView setContentOffset:CGPointMake(0, 0)];
 }
 
 #pragma mark - 控件消失
@@ -464,8 +471,8 @@ static NSString *identity = @"collection_cell";
 #pragma mark - BBMAlbumViewControllerDelegate
 - (void)bbmAlbumViewController:(BBMAlbumViewController *)bbmAlbumViewController didSeletedDataArr:(NSArray *)dataArr
 {
-    if ([self.delegate respondsToSelector:@selector(selectedImage:)]) {
-        [self.delegate selectedImage:dataArr];
+    if ([self.delegate respondsToSelector:@selector(imagePopupActionView:selectedImage:)]) {
+        [self.delegate imagePopupActionView:self selectedImage:dataArr];
     }
 }
 
@@ -484,8 +491,8 @@ static NSString *identity = @"collection_cell";
         
     }
     
-    if ([self.delegate respondsToSelector:@selector(imagePopupActionViewTokePhoto:)]) {
-        [self.delegate imagePopupActionViewTokePhoto:theImage];
+    if ([self.delegate respondsToSelector:@selector(imagePopupActionView:selectedImage:)]) {
+        [self.delegate imagePopupActionView:self tokePhoto:theImage];
     }
     
     [picker dismissViewControllerAnimated:YES completion:^{

@@ -11,9 +11,10 @@
 
 @interface ViewController ()<ImagePopupActionViewDelegate>
 
-@property(strong,nonatomic) UIButton *btn;
-@property(nonatomic,strong) ImagePopupActionView *popup;
-
+@property(strong,nonatomic) UIButton *btn1;
+@property(strong,nonatomic) UIButton *btn2;
+@property(nonatomic,strong) ImagePopupActionView *popup1;
+@property(nonatomic,strong) ImagePopupActionView *popup2;
 @end
 
 @implementation ViewController
@@ -24,29 +25,46 @@
     
     self.view.backgroundColor = [UIColor whiteColor];
     
-    self.btn = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 60, 40)];
-    self.btn.backgroundColor = [UIColor redColor];
-    [self.btn setTitle:@"测试" forState:UIControlStateNormal];
-    self.btn.center = self.view.center;
-    [self.btn addTarget:self action:@selector(btnAction:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:self.btn];
+    self.btn1 = [[UIButton alloc] initWithFrame:CGRectMake(60, 200, 200, 40)];
+    self.btn1.backgroundColor = [UIColor redColor];
+    [self.btn1 setTitle:@"noPreviewImage测试" forState:UIControlStateNormal];
+    [self.btn1 addTarget:self action:@selector(btn1Action:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:self.btn1];
+    
+    self.btn2 = [[UIButton alloc] initWithFrame:CGRectMake(60, CGRectGetMaxY(self.btn1.frame)+30, 200, 40)];
+    self.btn2.backgroundColor = [UIColor redColor];
+    [self.btn2 setTitle:@"previewImage测试" forState:UIControlStateNormal];
+    [self.btn2 addTarget:self action:@selector(btn2Action:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:self.btn2];
+    
+    self.popup1 = [[ImagePopupActionView alloc] initWithFrame:[UIScreen mainScreen].bounds withViewController:self previewImage:NO];
+    self.popup1.maxSelectedNumber = 0;
+    self.popup1.delegate = self;
     
     
+    self.popup2 = [[ImagePopupActionView alloc] initWithFrame:[UIScreen mainScreen].bounds withViewController:self previewImage:YES];
+    self.popup2.maxSelectedNumber = 0;
+    self.popup2.delegate = self;
 }
 
--(void)btnAction:(UIButton *)sender
+-(void)btn1Action:(UIButton *)sender
 {
-    self.popup = [[ImagePopupActionView alloc] initWithFrame:[UIScreen mainScreen].bounds withViewController:self];
-    self.popup.maxSelectedNumber = 0;
-    self.popup.delegate = self;
-    [self.popup showWithCompletion:^{
+    [self.popup1 showWithCompletion:^{
+        
+    }];
+}
+
+
+-(void)btn2Action:(UIButton *)sender
+{
+    [self.popup2 showWithCompletion:^{
         
     }];
 }
 
 #pragma mark - ImagePopupActionViewDelegate
 
--(void)selectedImage:(NSArray *)imageArray
+-(void)imagePopupActionView:(ImagePopupActionView *)actionView selectedImage:(NSArray *)imageArray
 {
     for (UIImage *image in imageArray) {
         NSData *imageData = UIImageJPEGRepresentation(image, 1);
@@ -70,7 +88,7 @@
     }
 }
 
--(void)imagePopupActionViewTokePhoto:(UIImage *)image
+-(void)imagePopupActionView:(ImagePopupActionView *)actionView tokePhoto:(UIImage *)image
 {
     NSData *imageData = UIImageJPEGRepresentation(image, 1);
     NSLog(@"原始图片大小%.2f",(float)imageData.length/1024.0);

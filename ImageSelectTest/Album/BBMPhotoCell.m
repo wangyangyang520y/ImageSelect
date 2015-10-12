@@ -81,7 +81,7 @@
 {
     _photoModel = photoModel;
     
-    self.contentImageView.image = [UIImage imageWithCGImage:[photoModel.asset aspectRatioThumbnail]];
+    self.contentImageView.image = [UIImage imageWithCGImage:[photoModel.asset thumbnail]];
     
     if (photoModel.isSelected) {
         self.btn.selected = YES;

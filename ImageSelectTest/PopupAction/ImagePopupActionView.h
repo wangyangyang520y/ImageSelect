@@ -8,12 +8,13 @@
 
 #import <UIKit/UIKit.h>
 #import <AssetsLibrary/AssetsLibrary.h>
+@class ImagePopupActionView;
 
 @protocol ImagePopupActionViewDelegate <NSObject>
 
--(void)imagePopupActionViewTokePhoto:(UIImage *)image;
+-(void)imagePopupActionView:(ImagePopupActionView *)actionView tokePhoto:(UIImage *)image;
 
--(void)selectedImage:(NSArray *)imageArray;
+-(void)imagePopupActionView:(ImagePopupActionView *)actionView selectedImage:(NSArray *)imageArray;
 
 @end
 
@@ -22,7 +23,7 @@
 @property(nonatomic,assign) id<ImagePopupActionViewDelegate> delegate;
 @property(nonatomic,assign) NSInteger maxSelectedNumber;
 
--(instancetype)initWithFrame:(CGRect)frame withViewController:(UIViewController *)viewController;
+-(instancetype)initWithFrame:(CGRect)frame withViewController:(UIViewController *)viewController previewImage:(BOOL)isPreviewImage;
 
 - (void)setImages:(NSArray *)images;
 
