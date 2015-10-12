@@ -48,7 +48,7 @@
     return self;
 }
 
--(void)setPhoto:(Photo *)photo
+-(void)setPhoto:(BrowsePhoto *)photo
 {
     _photo = photo;
     [self showPhoto];
@@ -153,7 +153,7 @@
 
 
 
-@implementation Photo
+@implementation BrowsePhoto
 
 -(instancetype)init
 {

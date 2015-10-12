@@ -45,7 +45,7 @@
     _maxSelectedNumber = maxSelectedNumber;
     self.photoArray = [[NSMutableArray alloc] init];
     for (BBMPhotoModel *photoModel in assetArray) {
-        Photo *photo = [[Photo alloc] init];
+        BrowsePhoto *photo = [[BrowsePhoto alloc] init];
         photo.asset = photoModel.asset;
         photo.isSelected = photoModel.isSelected;
         [self.photoArray addObject:photo];
@@ -70,7 +70,7 @@
     self.navigationItem.rightBarButtonItem = barItem;
     
     //判断初始化照片是否已经选中
-    Photo *photo = self.photoArray[self.currentIndex];
+    BrowsePhoto *photo = self.photoArray[self.currentIndex];
     [self.btnCheck setSelected:photo.isSelected];
     
     self.lbTitle = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 100, 40)];
@@ -107,7 +107,7 @@
     
     weakSelf.photoBrowseView.scrollToImageCallBackBlock = ^(NSInteger index){
         self.currentIndex = index;
-        Photo *photo = self.photoArray[index];
+        BrowsePhoto *photo = self.photoArray[index];
         [self.btnCheck setSelected:photo.isSelected];
         self.lbTitle.text = [NSString stringWithFormat:@"%@/%@",@(self.photoArray.count),@(self.currentIndex+1)];
     };
@@ -141,7 +141,7 @@
         self.selectedImageArray = [[NSMutableArray alloc] init];
     }
     
-    Photo *currentPhoto = self.photoArray[self.currentIndex];
+    BrowsePhoto *currentPhoto = self.photoArray[self.currentIndex];
     
     if (sender.isSelected) {
         currentPhoto.isSelected = NO;
@@ -174,7 +174,7 @@
     }];
     if ([self.delegate respondsToSelector:@selector(browseViewControllerSelectedImage:)]) {
         NSMutableArray *tempArray = [[NSMutableArray alloc] init];
-        for (Photo *photo in self.selectedImageArray) {
+        for (BrowsePhoto *photo in self.selectedImageArray) {
             [tempArray addObject:photo.asset];
         }
         [self.delegate browseViewControllerSelectedImage:tempArray];

@@ -99,7 +99,7 @@
     photoView.tapGestureCallBackBlock = self.tapGestureCallBackBlock;
     [self.photoScrollView addSubview:photoView];
     if (index<self.photoArray.count&&index>=0) {
-        Photo *photo = self.photoArray[index];
+        BrowsePhoto *photo = self.photoArray[index];
         [photoView setPhoto:photo];
     }
     
@@ -121,7 +121,7 @@
     CGRect photoViewFrame = CGRectMake(index*screenFrame.size.width+photoPadding, 0, screenFrame.size.width-2*photoPadding, screenFrame.size.height);
     //在两头的时候不需要复用photoView
     if (index<self.photoArray.count&&index>=0) {
-        Photo *photo = self.photoArray[index];
+        BrowsePhoto *photo = self.photoArray[index];
         self.reusePhotoView.frame = photoViewFrame;
         [self.reusePhotoView setPhoto:photo];
     }
@@ -155,12 +155,17 @@
     NSInteger index;
     //判断滚动方向，给index赋不同的值
     if (scrollView.contentOffset.x>prePosition) {//向右边滚动
-        
         index=ceilf(CGRectGetMinX(visibleBounds)/CGRectGetWidth(visibleBounds));
+        if(self.scrollToImageCallBackBlock && scrollView.contentOffset.x>index*CGRectGetWidth(visibleBounds)-CGRectGetWidth(visibleBounds)/2){
+            self.scrollToImageCallBackBlock(index);
+        }
     }else{
-        
         index=floorf(CGRectGetMinX(visibleBounds)/CGRectGetWidth(visibleBounds));
+        if(self.scrollToImageCallBackBlock && scrollView.contentOffset.x<index*CGRectGetWidth(visibleBounds)+CGRectGetWidth(visibleBounds)/2){
+            self.scrollToImageCallBackBlock(index);
+        }
     }
+    
     prePosition = scrollView.contentOffset.x;
     
     NSInteger needChangeIndex = 0;
@@ -226,7 +231,7 @@
         return;
     }
     if (self.currentPhotoView) {
-        Photo *photo = self.photoArray[self.currentPhotoIndex];
+        BrowsePhoto *photo = self.photoArray[self.currentPhotoIndex];
         [self.currentPhotoView setPhoto:photo];
     }
 }

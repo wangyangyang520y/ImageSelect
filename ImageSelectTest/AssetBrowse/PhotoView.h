@@ -9,11 +9,11 @@
 #import <UIKit/UIKit.h>
 #import <AssetsLibrary/AssetsLibrary.h>
 @class PhotoView;
-@class Photo;
+@class BrowsePhoto;
 
 @interface PhotoView : UIScrollView
 
-@property(nonatomic,strong)Photo *photo;
+@property(nonatomic,strong)BrowsePhoto *photo;
 @property(nonatomic,assign) CGRect imageOriginFrame;
 @property(nonatomic,strong)UIImageView *imageView;
 @property(nonatomic,strong) void(^tapGestureCallBackBlock)();
@@ -21,7 +21,7 @@
 @end
 
 
-@interface Photo : NSObject
+@interface BrowsePhoto : NSObject
 
 @property (nonatomic, strong)  ALAsset *asset;
 @property (nonatomic, assign) BOOL isSelected; // 是否选中

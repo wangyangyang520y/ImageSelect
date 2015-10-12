@@ -22,6 +22,15 @@ static BBMPhotosViewController *photoVc;
 
 @implementation BBMAlbumViewController
 
+-(instancetype)init
+{
+    self = [super init];
+    if (self) {
+        self.title = @"相册";
+    }
+    return self;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     
@@ -50,8 +59,6 @@ static BBMPhotosViewController *photoVc;
     self.myTableView.delegate = self;
     self.myTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [self.view addSubview:self.myTableView];
-    
-    self.title = @"相册";
     
 }
 
