@@ -50,13 +50,13 @@
     
     self.popup1 = [[ImagePopupActionView alloc] initWithFrame:[UIScreen mainScreen].bounds withViewController:self previewImage:NO];
     self.popup1.maxSelectedNumber = 5;
-    self.popup1.isDispalySelectedItem = YES;
+    self.popup1.isDispalySelectedItem = NO;
     self.popup1.delegate = self;
     
     
     self.popup2 = [[ImagePopupActionView alloc] initWithFrame:[UIScreen mainScreen].bounds withViewController:self previewImage:YES];
     self.popup2.maxSelectedNumber = 5;
-    self.popup2.isDispalySelectedItem = YES;
+    self.popup2.isDispalySelectedItem = NO;
     self.popup2.delegate = self;
 }
 
@@ -83,9 +83,9 @@
     
 }
 
--(void)imagePopupActionView:(ImagePopupActionView *)actionView tokePhotoAsset:(ALAsset *)asset{
-    
-}
+//-(void)imagePopupActionView:(ImagePopupActionView *)actionView tokePhotoAsset:(ALAsset *)asset{
+//    
+//}
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

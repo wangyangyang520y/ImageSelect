@@ -109,10 +109,23 @@ static NSString *identity = @"collection_cell";
     });
 }
 
--(void)deleteSelectedAsset:(NSInteger )index
+-(void)deleteSelectedAsset:(ALAsset *)asset
 {
-    if (self.selectedAssetArray.count>index) {
-        [self.selectedAssetArray removeObjectAtIndex:index];
+    if (asset) {
+        [self.selectedAssetArray removeObject:asset];
+    }
+}
+
+-(void)recoverToInitState
+{
+    [self.selectedPhotoObjArray removeAllObjects];
+    [self.thisSelectedPhotoOjbArray removeAllObjects];
+    [self.selectedAssetArray removeAllObjects];
+    [self.scrollView setContentOffset:CGPointMake(0, 0)];
+    
+    for (PhtotObj *photo in self.photoObjArray) {
+        [photo.btnCheck setSelected:NO];
+        [photo dismissCover];
     }
 }
 
@@ -490,47 +503,52 @@ static NSString *identity = @"collection_cell";
 
 -(void)resumeWholeView
 {
-    if(self.isPreviewImage){
-        if (self.selectedPhotoObjArray) {
-            [self.selectedPhotoObjArray removeAllObjects];
-        }else{
-            self.selectedPhotoObjArray = [[NSMutableArray alloc] init];
-        }
-        
-        if (self.thisSelectedPhotoOjbArray) {
-            [self.thisSelectedPhotoOjbArray removeAllObjects];
-        }else{
-            self.thisSelectedPhotoOjbArray = [[NSMutableArray alloc] init];
-        }
-        
-        for (PhtotObj *photoObj in self.photoObjArray) {
-            [photoObj.btnCheck setSelected:NO];
-            if (self.maxSelectedNumber>0 && self.selectedAssetArray.count >= self.maxSelectedNumber) {
-                [photoObj showCover];
+    if(self.isDispalySelectedItem){
+        if(self.isPreviewImage){
+            if (self.selectedPhotoObjArray) {
+                [self.selectedPhotoObjArray removeAllObjects];
             }else{
-                [photoObj dismissCover];
+                self.selectedPhotoObjArray = [[NSMutableArray alloc] init];
             }
-            for (ALAsset *asset in self.selectedAssetArray) {
-                if ([[asset defaultRepresentation].url isEqual:[photoObj.asset defaultRepresentation].url]) {
-                    [photoObj.btnCheck setSelected:YES];
+            
+            if (self.thisSelectedPhotoOjbArray) {
+                [self.thisSelectedPhotoOjbArray removeAllObjects];
+            }else{
+                self.thisSelectedPhotoOjbArray = [[NSMutableArray alloc] init];
+            }
+            
+            for (PhtotObj *photoObj in self.photoObjArray) {
+                [photoObj.btnCheck setSelected:NO];
+                if (self.maxSelectedNumber>0 && self.selectedAssetArray.count >= self.maxSelectedNumber) {
+                    [photoObj showCover];
+                }else{
                     [photoObj dismissCover];
-                    [self.selectedPhotoObjArray addObject:photoObj];
-                    break;
+                }
+                for (ALAsset *asset in self.selectedAssetArray) {
+                    if ([[asset defaultRepresentation].url isEqual:[photoObj.asset defaultRepresentation].url]) {
+                        [photoObj.btnCheck setSelected:YES];
+                        [photoObj dismissCover];
+                        [self.selectedPhotoObjArray addObject:photoObj];
+                        break;
+                    }
                 }
             }
-        }
-       
-        if (self.selectedPhotoObjArray && self.selectedPhotoObjArray.count>0) {
-            PhtotObj *photoObj = self.selectedPhotoObjArray[0];
-            [self.scrollView setContentOffset:CGPointMake(photoObj.imageView.frame.origin.x-5, 0)];
+            
+            if (self.selectedPhotoObjArray && self.selectedPhotoObjArray.count>0) {
+                PhtotObj *photoObj = self.selectedPhotoObjArray[0];
+                [self.scrollView setContentOffset:CGPointMake(photoObj.imageView.frame.origin.x-5, 0)];
+            }else{
+                [self.scrollView setContentOffset:CGPointMake(0, 0)];
+            }
+            
         }else{
+            [self.selectedPhotoObjArray removeAllObjects];
             [self.scrollView setContentOffset:CGPointMake(0, 0)];
         }
-        
     }else{
-        [self.selectedPhotoObjArray removeAllObjects];
-        [self.scrollView setContentOffset:CGPointMake(0, 0)];
+        [self recoverToInitState];
     }
+    
     [self changeBtnState];
 }
 
@@ -550,9 +568,7 @@ static NSString *identity = @"collection_cell";
 #pragma mark - BBMAlbumViewControllerDelegate
 - (void)bbmAlbumViewController:(BBMAlbumViewController *)bbmAlbumViewController didSeletedAssetArrary:(NSArray *)assetArrary
 {
-    if (self.isDispalySelectedItem) {
-        self.selectedAssetArray = [NSMutableArray arrayWithArray:assetArrary];
-    }
+    self.selectedAssetArray = [NSMutableArray arrayWithArray:assetArrary];
     
     if ([self.delegate respondsToSelector:@selector(imagePopupActionView:selectedAsset:)]) {
         [self.delegate imagePopupActionView:self selectedAsset:self.selectedAssetArray];
@@ -583,8 +599,8 @@ static NSString *identity = @"collection_cell";
         
         [self.selectedAssetArray addObject:myasset];
         
-        if ([self.delegate respondsToSelector:@selector(imagePopupActionView:tokePhotoAsset:)]) {
-            [self.delegate imagePopupActionView:self tokePhotoAsset:myasset];
+        if ([self.delegate respondsToSelector:@selector(imagePopupActionView:selectedAsset:)]) {
+            [self.delegate imagePopupActionView:self selectedAsset:self.selectedAssetArray];
         }
         
         [self.picker dismissViewControllerAnimated:YES completion:^{

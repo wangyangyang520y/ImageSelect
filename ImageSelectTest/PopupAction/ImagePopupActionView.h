@@ -12,7 +12,7 @@
 
 @protocol ImagePopupActionViewDelegate <NSObject>
 
--(void)imagePopupActionView:(ImagePopupActionView *)actionView tokePhotoAsset:(ALAsset *)asset;
+//-(void)imagePopupActionView:(ImagePopupActionView *)actionView tokePhotoAsset:(ALAsset *)asset;
 
 -(void)imagePopupActionView:(ImagePopupActionView *)actionView selectedAsset:(NSArray *)assetArray;
 
@@ -20,20 +20,47 @@
 
 @interface ImagePopupActionView : UIView
 
-@property(nonatomic,assign) id<ImagePopupActionViewDelegate> delegate;
-@property(nonatomic,assign) NSInteger maxSelectedNumber;
-@property(nonatomic,assign) BOOL isDispalySelectedItem;
+@property(nonatomic,assign) NSInteger maxSelectedNumber;  //最大可选择的数量（<=0表示可以无限选）
+@property(nonatomic,assign) BOOL isDispalySelectedItem;   //是否选中上次选中过程中选中的项
 
+@property(nonatomic,assign) id<ImagePopupActionViewDelegate> delegate;
+
+/**
+ *  初始化方法
+ *
+ *  @param frame
+ *  @param viewController 来自哪个vc
+ *  @param isPreviewImage 是否显示预览图片部分
+ *
+ *  @return
+ */
 -(instancetype)initWithFrame:(CGRect)frame withViewController:(UIViewController *)viewController previewImage:(BOOL)isPreviewImage;
 
-
-- (void)setImages:(NSArray *)images;
-
--(void)deleteSelectedAsset:(NSInteger )index;
-
+/**
+ *  显示
+ *
+ *  @param completion 显示完成回调
+ */
 -(void)showWithCompletion:(void(^)())completion;
 
+/**
+ *  隐藏
+ *
+ *  @param completion 隐藏完成回调
+ */
 -(void)dismissWithCompletion:(void(^)())completion;
+
+/**
+ *  通过其他方式删除图片的时候调用此方法同步选中的数据
+ *
+ *  @param asset
+ */
+-(void)deleteSelectedAsset:(ALAsset *)asset;
+
+/**
+ *  恢复到初始化状态
+ */
+-(void)recoverToInitState;
 
 @end
 

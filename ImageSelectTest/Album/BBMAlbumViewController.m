@@ -102,10 +102,7 @@ static BBMPhotosViewController *photoVc;
         BBMPhotoModel *photoModel = [[BBMPhotoModel alloc] init];
         photoModel.asset = asset;
         [tempArray addObject:photoModel];
-        
-//        if ([self.selectedAssetArray containsObject:asset]) {
-//            photoModel.isSelected = YES;
-//        }
+
         for (ALAsset *selectedAsset in self.selectedAssetArray) {
             if ([[selectedAsset defaultRepresentation].url isEqual:[asset defaultRepresentation].url]) {
                 photoModel.isSelected = YES;
