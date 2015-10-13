@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "PhotoView.h"
+#import "AssetPhotoView.h"
 
 #define photoPadding 10
 
@@ -18,7 +18,7 @@ typedef enum {
 } Direct;
 
 
-@interface PhotoBrowseView :UIView <UIScrollViewDelegate>
+@interface AlbumPhotoBrowseView :UIView <UIScrollViewDelegate>
 
 @property(nonatomic,strong) void(^scrollToImageCallBackBlock)(NSInteger index);
 

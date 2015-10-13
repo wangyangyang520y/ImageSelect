@@ -12,9 +12,9 @@
 
 @protocol ImagePopupActionViewDelegate <NSObject>
 
--(void)imagePopupActionView:(ImagePopupActionView *)actionView tokePhoto:(UIImage *)image;
+-(void)imagePopupActionView:(ImagePopupActionView *)actionView tokePhotoAsset:(ALAsset *)asset;
 
--(void)imagePopupActionView:(ImagePopupActionView *)actionView selectedImage:(NSArray *)imageArray;
+-(void)imagePopupActionView:(ImagePopupActionView *)actionView selectedAsset:(NSArray *)assetArray;
 
 @end
 
@@ -22,10 +22,14 @@
 
 @property(nonatomic,assign) id<ImagePopupActionViewDelegate> delegate;
 @property(nonatomic,assign) NSInteger maxSelectedNumber;
+@property(nonatomic,assign) BOOL isDispalySelectedItem;
 
 -(instancetype)initWithFrame:(CGRect)frame withViewController:(UIViewController *)viewController previewImage:(BOOL)isPreviewImage;
 
+
 - (void)setImages:(NSArray *)images;
+
+-(void)deleteSelectedAsset:(NSInteger )index;
 
 -(void)showWithCompletion:(void(^)())completion;
 

@@ -14,16 +14,14 @@
 @protocol BBMAlbumViewControllerDelegate <NSObject>
 
 @optional
-- (void)bbmAlbumViewController:(BBMAlbumViewController *)bbmAlbumViewController didSeletedDataArr:(NSArray *)dataArr;
+- (void)bbmAlbumViewController:(BBMAlbumViewController *)bbmAlbumViewController didSeletedAssetArrary:(NSArray *)assetArrary;
 
 @end
 
 @interface BBMAlbumViewController : UIViewController<UITableViewDataSource, UITableViewDelegate, BBMPhotosViewControllerDelegate>
 
-@property(nonatomic, strong)NSArray *dataArr;
-
-@property(nonatomic,assign) NSInteger  maxSelectedNumber;
-
 @property(nonatomic, weak)id<BBMAlbumViewControllerDelegate> delegate;
+
+-(void)setAssetArray:(NSArray *)assetArray selectedAssetArray:(NSMutableArray *)selectedAssetArray maxSelectedNumber:(NSInteger)maxSelectedNumber;
 
 @end

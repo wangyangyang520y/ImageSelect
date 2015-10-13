@@ -11,12 +11,14 @@
 @protocol BBMPhotosViewControllerDelegate <NSObject>
 
 @optional
-- (void)bbmPhotosViewController:(BBMPhotosViewController *)bbmPhotosViewController didSeletedDataArr:(NSArray *)dataArr;
+- (void)bbmPhotosViewController:(BBMPhotosViewController *)bbmPhotosViewController didSelectedAssetArray:(NSArray *)assetArray;
 
 @end
 
 @interface BBMPhotosViewController : UIViewController
-@property(nonatomic,assign) NSInteger  maxSelectedNumber;
-@property(nonatomic,strong)NSArray *dataArr;
+
 @property(nonatomic,weak)id<BBMPhotosViewControllerDelegate> delegate;
+
+-(void)setPhotoModelArray:(NSArray *)photoModelArray selectedAssetArray:(NSMutableArray *)selectedAssetArray maxSelectedNumber:(NSInteger)maxSelectedNumber;
+
 @end

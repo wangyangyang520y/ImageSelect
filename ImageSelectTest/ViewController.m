@@ -15,6 +15,8 @@
 @property(strong,nonatomic) UIButton *btn2;
 @property(nonatomic,strong) ImagePopupActionView *popup1;
 @property(nonatomic,strong) ImagePopupActionView *popup2;
+
+@property(nonatomic,strong) UILabel *lbDisplay;
 @end
 
 @implementation ViewController
@@ -37,13 +39,24 @@
     [self.btn2 addTarget:self action:@selector(btn2Action:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.btn2];
     
+    
+    self.lbDisplay = [[UILabel alloc] initWithFrame:CGRectMake(20, CGRectGetMaxY(self.btn2.frame)+30, self.view.frame.size.width-40, 200)];
+    self.lbDisplay.textAlignment = NSTextAlignmentCenter;
+    self.lbDisplay.textColor = [UIColor redColor];
+    self.lbDisplay.font = [UIFont systemFontOfSize:20];
+    [self.view addSubview:self.lbDisplay];
+    
+    
+    
     self.popup1 = [[ImagePopupActionView alloc] initWithFrame:[UIScreen mainScreen].bounds withViewController:self previewImage:NO];
-    self.popup1.maxSelectedNumber = 0;
+    self.popup1.maxSelectedNumber = 5;
+    self.popup1.isDispalySelectedItem = YES;
     self.popup1.delegate = self;
     
     
     self.popup2 = [[ImagePopupActionView alloc] initWithFrame:[UIScreen mainScreen].bounds withViewController:self previewImage:YES];
-    self.popup2.maxSelectedNumber = 0;
+    self.popup2.maxSelectedNumber = 5;
+    self.popup2.isDispalySelectedItem = YES;
     self.popup2.delegate = self;
 }
 
@@ -64,34 +77,14 @@
 
 #pragma mark - ImagePopupActionViewDelegate
 
--(void)imagePopupActionView:(ImagePopupActionView *)actionView selectedImage:(NSArray *)imageArray
-{
-    for (UIImage *image in imageArray) {
-        NSData *imageData = UIImageJPEGRepresentation(image, 1);
-        NSLog(@"原始图片大小%.2f",(float)imageData.length/1024.0);
-        
-        imageData = UIImageJPEGRepresentation(image, 0.5);
-        NSLog(@"0.5图片大小%.2f",(float)imageData.length/1024.0);
-        
-        imageData = UIImageJPEGRepresentation(image, 0.4);
-        NSLog(@"0.4图片大小%.2f",(float)imageData.length/1024.0);
-        
-        imageData = UIImageJPEGRepresentation(image, 0.3);
-        NSLog(@"0.3图片大小%.2f",(float)imageData.length/1024.0);
-        
-        imageData = UIImageJPEGRepresentation(image, 0.2);
-        NSLog(@"0.2图片大小%.2f",(float)imageData.length/1024.0);
-        
-        imageData = UIImageJPEGRepresentation(image, 0.1);
-        NSLog(@"0.1图片大小%.2f",(float)imageData.length/1024.0);
-        
-    }
+-(void)imagePopupActionView:(ImagePopupActionView *)actionView selectedAsset:(NSArray *)assetArray{
+    
+    self.lbDisplay.text = [NSString stringWithFormat:@"确认提交的照片数量：%@",@(assetArray.count)];
+    
 }
 
--(void)imagePopupActionView:(ImagePopupActionView *)actionView tokePhoto:(UIImage *)image
-{
-    NSData *imageData = UIImageJPEGRepresentation(image, 1);
-    NSLog(@"原始图片大小%.2f",(float)imageData.length/1024.0);
+-(void)imagePopupActionView:(ImagePopupActionView *)actionView tokePhotoAsset:(ALAsset *)asset{
+    
 }
 
 - (void)didReceiveMemoryWarning {

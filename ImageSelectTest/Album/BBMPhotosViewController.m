@@ -15,9 +15,17 @@
 static NSString *collectionViewCellID = @"BBMPhotoCell";
 
 @interface BBMPhotosViewController ()<UICollectionViewDataSource, UICollectionViewDelegate, BBMPhotoCellDelegate,BBMAlbumBrowseViewControllerDelegate>
+{
+    BOOL isSelectedCompletion;
+}
+
 @property(nonatomic, strong)UICollectionView *myCollectionView;
 
-@property(nonatomic, strong)NSMutableArray *seletedArrM;
+@property(nonatomic, strong)NSMutableArray *selectedAssetArray;
+//@property(nonatomic, strong)NSArray *seletedInitAssetArray;
+
+@property(nonatomic,assign) NSInteger  maxSelectedNumber;
+@property(nonatomic,strong)NSArray *photoModelArray;
 
 @property(nonatomic, strong)UIView *footerView;
 @property(nonatomic, strong)UIButton *btnConfirm;
@@ -30,7 +38,7 @@ static NSString *collectionViewCellID = @"BBMPhotoCell";
 {
     self = [super init];
     if (self) {
-        
+        isSelectedCompletion = NO;
     }
     return self;
 }
@@ -44,17 +52,30 @@ static NSString *collectionViewCellID = @"BBMPhotoCell";
     [self initSubviews];
 }
 
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    if (self.maxSelectedNumber>0 && isSelectedCompletion) {
+        for(BBMPhotoModel *model in self.photoModelArray){
+            if (model.isSelected == NO) {
+                model.isCover = YES;
+            }
+        }
+        [self.myCollectionView reloadData];
+    }
+}
 
 - (void)initData
 {
-    self.seletedArrM = [NSMutableArray array];
+    if (!self.selectedAssetArray) {
+        self.selectedAssetArray = [[NSMutableArray alloc] init];
+    }
 }
 
 - (void)initNavibar
 {
     self.title = @"照片";
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"取消" style:UIBarButtonItemStylePlain target:self action:@selector(back)];
-
 }
 
 - (void)initSubviews
@@ -74,13 +95,23 @@ static NSString *collectionViewCellID = @"BBMPhotoCell";
     [self.view addSubview:self.myCollectionView];
     self.myCollectionView.contentInset = UIEdgeInsetsMake(5, 5, 40, 5);
     
-    [self.myCollectionView reloadData];
-    
-    [self setupConfirmBtn];
-    
     //注册
     [self.myCollectionView registerClass:[BBMPhotoCell class] forCellWithReuseIdentifier:collectionViewCellID];
-   
+    
+    [self setupConfirmBtn];
+}
+
+-(void)setPhotoModelArray:(NSArray *)photoModelArray selectedAssetArray:(NSMutableArray *)selectedAssetArray maxSelectedNumber:(NSInteger)maxSelectedNumber
+{
+    self.photoModelArray = photoModelArray;
+    if (selectedAssetArray) {
+        self.selectedAssetArray = selectedAssetArray;
+    }
+    self.maxSelectedNumber = maxSelectedNumber;
+    
+    if(self.maxSelectedNumber >0 && self.selectedAssetArray && self.selectedAssetArray.count>=self.maxSelectedNumber){
+        isSelectedCompletion = YES;
+    }
 }
 
 - (void)setupConfirmBtn
@@ -113,8 +144,8 @@ static NSString *collectionViewCellID = @"BBMPhotoCell";
 
 - (void)confirmBtnClick:(UIButton *)sender
 {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(bbmPhotosViewController:didSeletedDataArr:)]) {
-        [self.delegate bbmPhotosViewController:self didSeletedDataArr:self.seletedArrM];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(bbmPhotosViewController:didSelectedAssetArray:)]) {
+        [self.delegate bbmPhotosViewController:self didSelectedAssetArray:self.selectedAssetArray];
     }
     [self back];
 }
@@ -124,33 +155,34 @@ static NSString *collectionViewCellID = @"BBMPhotoCell";
  */
 - (void)back
 {
+    [self.selectedAssetArray removeAllObjects];
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 -(void)changeComfirmBtnState
 {
-    if (self.seletedArrM.count<=0) {
+    if (self.selectedAssetArray.count<=0) {
         [self.btnConfirm setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
         [self.btnConfirm setEnabled:NO];
     }else{
         [self.btnConfirm setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
         [self.btnConfirm setEnabled:YES];
     }
-    [self.btnConfirm setTitle:[NSString stringWithFormat:@"确认（%@张）",@(self.seletedArrM.count)] forState:UIControlStateNormal];
+    [self.btnConfirm setTitle:[NSString stringWithFormat:@"确认（%@张）",@(self.selectedAssetArray.count)] forState:UIControlStateNormal];
 }
 
 #pragma mark - UICollectionViewDelegate
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-    return self.dataArr.count;
+    return self.photoModelArray.count;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     BBMPhotoCell *photoCell = [collectionView dequeueReusableCellWithReuseIdentifier:collectionViewCellID forIndexPath:indexPath];
     photoCell.delegate = self;
-    photoCell.photoModel = self.dataArr[indexPath.row];
+    photoCell.photoModel = self.photoModelArray[indexPath.row];
     
     return photoCell;
 }
@@ -160,20 +192,20 @@ static NSString *collectionViewCellID = @"BBMPhotoCell";
 {
     BBMAlbumBrowseViewController *vc = [[BBMAlbumBrowseViewController alloc] init];
     vc.delegate = self;
-    [vc setAssetArray:self.dataArr currentIndex:indexPath.row maxSelectedNumber:self.maxSelectedNumber];
+    [vc setPhotoModelArray:self.photoModelArray currentIndex:indexPath.row maxSelectedNumber:self.maxSelectedNumber];
     [self.navigationController pushViewController:vc animated:YES];
 }
 
 #pragma  mark - BBMPhotoCellDelegate
 - (void)bbmPhotoCell:(BBMPhotoCell *)bbmPhotoCell didSeletedAsset:(ALAsset *)seletedAsset
 {
-    [self.seletedArrM addObject:seletedAsset];
+    [self.selectedAssetArray addObject:seletedAsset];
     bbmPhotoCell.photoModel.isSelected = YES;
     bbmPhotoCell.photoModel.isCover = NO;
 
-    if (self.maxSelectedNumber>0 && self.seletedArrM.count == self.maxSelectedNumber) {
+    if (self.maxSelectedNumber>0 && self.selectedAssetArray.count == self.maxSelectedNumber) {
         
-        for(BBMPhotoModel *model in self.dataArr){
+        for(BBMPhotoModel *model in self.photoModelArray){
             if (model.isSelected == NO) {
                 model.isCover = YES;
             }
@@ -187,12 +219,12 @@ static NSString *collectionViewCellID = @"BBMPhotoCell";
 
 - (void)bbmPhotoCell:(BBMPhotoCell *)bbmPhotoCell didDeseletedAsset:(ALAsset *)deseletedAsset
 {
-    [self.seletedArrM removeObject:deseletedAsset];
+    [self.selectedAssetArray removeObject:deseletedAsset];
     bbmPhotoCell.photoModel.isSelected = NO;
     bbmPhotoCell.photoModel.isCover = NO;
     
-    if (self.seletedArrM.count == self.maxSelectedNumber-1) {
-        for(BBMPhotoModel *model in self.dataArr){
+    if (self.selectedAssetArray.count == self.maxSelectedNumber-1) {
+        for(BBMPhotoModel *model in self.photoModelArray){
             if (model.isSelected == NO) {
                 model.isCover = NO;
             }
@@ -205,10 +237,10 @@ static NSString *collectionViewCellID = @"BBMPhotoCell";
 
 #pragma mark - BBMAlbumBrowseViewControllerDelegate
 
--(void)browseViewControllerSelectedImage:(NSArray *)imageArray
+-(void)browseViewControllerSelectedAsset:(NSArray *)assetArray
 {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(bbmPhotosViewController:didSeletedDataArr:)]) {
-        [self.delegate bbmPhotosViewController:self didSeletedDataArr:imageArray];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(bbmPhotosViewController:didSelectedAssetArray:)]) {
+        [self.delegate bbmPhotosViewController:self didSelectedAssetArray:assetArray];
     }
     [self back];
 }

@@ -14,24 +14,14 @@
 #import "BBMPhotosViewController.h"
 #import "BBMPhotoModel.h"
 
-
-#define defaultImageHeight       150
-
-
-#define defaultMaxShowImageNumber 50
-
-typedef enum {
-    BtnAlbumAction_openAlbum,
-    BtnAlbumAction_sendImage
-}BtnAlbumActionType;
+#define defaultImageHeight          150
+#define defaultMaxShowImageNumber    50
 
 @interface ImagePopupActionView()<BBMAlbumViewControllerDelegate,UIImagePickerControllerDelegate,UINavigationControllerDelegate>
-{
-    BtnAlbumActionType btnAlbumActionType;
-}
 
 @property(nonatomic,weak) UIWindow *window;
 @property(nonatomic,strong) UIViewController *viewController;
+@property(nonatomic,assign) BOOL isPreviewImage; //是否需要显示预览图片（即scrollview部分）
 
 @property(nonatomic,strong) UIView *contentView;
 @property(nonatomic,strong) UICollectionView *collectionView;
@@ -39,17 +29,20 @@ typedef enum {
 @property(nonatomic,strong) UIButton *btnAlbum;
 @property(nonatomic,strong) UIButton *btnTokePhoto;
 @property(nonatomic,strong) UIButton *btnCancel;
+@property(nonatomic,strong) UIButton *btnPreviewImageConfirm;
 
 @property(nonatomic,strong) NSLayoutConstraint *contentViewConstraintV;
 
 @property(nonatomic,strong) NSMutableArray *photoObjArray;
-@property(nonatomic,strong) NSMutableArray *selectedImageArray;
+@property(nonatomic,strong) NSMutableArray *selectedPhotoObjArray;//所有选中的照片，包括拍摄的照片
+@property(nonatomic,strong) NSMutableArray *thisSelectedPhotoOjbArray;//本次打开后，重新选中的照片
+@property(nonatomic,strong) NSMutableArray *thisDeSelectedPhotoOjbArray;//本次打开后，取消之前选中的照片
 
 @property(nonatomic,strong) UIImagePickerController *picker;
 
-@property(nonatomic,strong) NSArray *albumAndAssetArray;
+@property(nonatomic,strong) NSArray *albumAndAssetArray; //所有相册的数据
 
-@property(nonatomic,assign) BOOL isPreviewImage;
+@property(nonatomic,strong) NSMutableArray *selectedAssetArray;  //已经确认选中的图片数据（包括拍照获取的）
 
 @end
 
@@ -64,7 +57,7 @@ static NSString *identity = @"collection_cell";
         self.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.0];
         self.viewController = viewController;
         self.isPreviewImage = isPreviewImage;
-        btnAlbumActionType = BtnAlbumAction_openAlbum;
+        self.isDispalySelectedItem = YES;
         self.window = [[UIApplication sharedApplication].windows lastObject];
         
         [self addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapGstureAction:)]];
@@ -75,24 +68,9 @@ static NSString *identity = @"collection_cell";
             _picker.allowsEditing = NO;//设置可编辑
         });
         
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            [BBMAlbumAssetTool getAllAlbumAndAssetsComplete:^(NSArray *dataArray) {
-                self.albumAndAssetArray = dataArray;
-                if (self.isPreviewImage) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        NSArray *tempArray = ((NSDictionary *)self.albumAndAssetArray[0])[BBMAssetAlbumPhotosArr];
-                        if (tempArray.count>defaultMaxShowImageNumber) {
-                            [self setImages:[tempArray subarrayWithRange:NSMakeRange(tempArray.count-defaultMaxShowImageNumber, defaultMaxShowImageNumber)]];
-                        }else{
-                            [self setImages:tempArray];
-                        }
-                        
-                    });
-                }
-            } albumAuthorizationFail:^{
-                
-            }];
-        });
+        [self initData];
+        
+        [self asyncGetAlbumData];
         
         [self setUpView];
     }
@@ -102,6 +80,40 @@ static NSString *identity = @"collection_cell";
 -(void)layoutSubviews
 {
     [super layoutSubviews];
+}
+
+-(void)initData
+{
+    self.selectedAssetArray = [[NSMutableArray alloc] init];
+}
+
+-(void)asyncGetAlbumData
+{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [BBMAlbumAssetTool getAllAlbumAndAssetsComplete:^(NSArray *dataArray) {
+            self.albumAndAssetArray = dataArray;
+            if (self.isPreviewImage) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    NSArray *tempArray = ((NSDictionary *)self.albumAndAssetArray[0])[BBMAssetAlbumPhotosArr];
+                    if (tempArray.count>defaultMaxShowImageNumber) {
+                        [self setImages:[tempArray subarrayWithRange:NSMakeRange(0, defaultMaxShowImageNumber)]];
+                    }else{
+                        [self setImages:tempArray];
+                    }
+                    
+                });
+            }
+        } albumAuthorizationFail:^{
+            
+        }];
+    });
+}
+
+-(void)deleteSelectedAsset:(NSInteger )index
+{
+    if (self.selectedAssetArray.count>index) {
+        [self.selectedAssetArray removeObjectAtIndex:index];
+    }
 }
 
 #pragma mark - 设置初始化view和约束
@@ -145,6 +157,15 @@ static NSString *identity = @"collection_cell";
     [self.btnCancel setBackgroundColor:[UIColor whiteColor]];
     [self.contentView addSubview:self.btnCancel];
     
+    if (self.isPreviewImage) {
+        self.btnPreviewImageConfirm = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.btnPreviewImageConfirm.translatesAutoresizingMaskIntoConstraints = NO;
+        [self.btnPreviewImageConfirm setTitleColor:[UIColor orangeColor] forState:UIControlStateNormal];
+        [self.btnPreviewImageConfirm setBackgroundColor:[UIColor whiteColor]];
+        [self.btnPreviewImageConfirm addTarget:self action:@selector(btnPreviewImageConfirmAction:) forControlEvents:UIControlEventTouchUpInside];
+        [self.contentView addSubview:self.btnPreviewImageConfirm];
+    }
+    
     [self setUpConstraint];
 }
 
@@ -161,7 +182,8 @@ static NSString *identity = @"collection_cell";
     
     if(self.isPreviewImage){
         [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[_scrollView]-0-|" options:NSLayoutFormatAlignAllTop metrics:nil views:NSDictionaryOfVariableBindings(_scrollView)]];
-        [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[_scrollView(==height)]-5-[_btnAlbum(==40)]-0.5-[_btnTokePhoto(==40)]-5-[_btnCancel(==40)]-0-|" options:0 metrics:@{@"height":@(defaultImageHeight+10)} views:NSDictionaryOfVariableBindings(_scrollView,_btnAlbum,_btnTokePhoto,_btnCancel)]];
+        [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-0-[_btnPreviewImageConfirm]-0-|" options:NSLayoutFormatAlignAllTop metrics:nil views:NSDictionaryOfVariableBindings(_btnPreviewImageConfirm)]];
+        [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[_scrollView(==height)]-0.5-[_btnPreviewImageConfirm]-5-[_btnAlbum(==40)]-0.5-[_btnTokePhoto(==40)]-5-[_btnCancel(==40)]-0-|" options:0 metrics:@{@"height":@(defaultImageHeight+10)} views:NSDictionaryOfVariableBindings(_scrollView,_btnPreviewImageConfirm,_btnAlbum,_btnTokePhoto,_btnCancel)]];
     }else{
         [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-0-[_btnAlbum(==40)]-0.5-[_btnTokePhoto(==40)]-5-[_btnCancel(==40)]-0-|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_btnAlbum,_btnTokePhoto,_btnCancel)]];
     }
@@ -252,7 +274,7 @@ static NSString *identity = @"collection_cell";
     }
 }
 
-#pragma mark - 图片tap回调
+#pragma mark - 图片tap手势回调
 -(void)imageViewTapped:(UITapGestureRecognizer *)gesture
 {
     [self selectedHandle:(UIImageView *)gesture.view];
@@ -269,8 +291,14 @@ static NSString *identity = @"collection_cell";
 
 -(void)selectedHandle:(UIImageView *)imageView
 {
-    if (!self.selectedImageArray) {
-        self.selectedImageArray = [[NSMutableArray alloc] init];
+    if (!self.selectedPhotoObjArray) {
+        self.selectedPhotoObjArray = [[NSMutableArray alloc] init];
+    }
+    if(!self.thisSelectedPhotoOjbArray){
+        self.thisSelectedPhotoOjbArray = [[NSMutableArray alloc] init];
+    }
+    if(!self.thisDeSelectedPhotoOjbArray){
+        self.thisDeSelectedPhotoOjbArray = [[NSMutableArray alloc] init];
     }
     
     NSInteger tag = imageView.tag;
@@ -278,81 +306,97 @@ static NSString *identity = @"collection_cell";
     UIButton *btnCheck = photo.btnCheck;
 
     if (btnCheck.isSelected) {
-        [self.selectedImageArray removeObject:photo];
-        if (self.selectedImageArray.count == self.maxSelectedNumber-1) {
+        [self.selectedPhotoObjArray removeObject:photo];
+        if ([self.thisSelectedPhotoOjbArray containsObject:photo]) {
+            [self.thisSelectedPhotoOjbArray removeObject:photo];
+        }else{
+            [self.thisDeSelectedPhotoOjbArray addObject:photo];
+        }
+        if (self.selectedPhotoObjArray.count == self.maxSelectedNumber-1) {
             for (PhtotObj *photo in self.photoObjArray) {
                 [photo dismissCover];
             }
         }
         [btnCheck setSelected:NO];
     }else{
-        [self.selectedImageArray addObject:photo];
+        [self.selectedPhotoObjArray addObject:photo];
+        [self.thisSelectedPhotoOjbArray addObject:photo];
         [btnCheck setSelected:YES];
-        if (self.maxSelectedNumber>0 && self.selectedImageArray.count==self.maxSelectedNumber) {
+        if (self.maxSelectedNumber>0 && self.selectedPhotoObjArray.count==self.maxSelectedNumber) {
             NSLog(@"图片选择总数超过最大可选数量%@",@(self.maxSelectedNumber));
             for (PhtotObj *photo in self.photoObjArray) {
                 [photo showCover];
             }
         }
     }
-    
-    if (self.selectedImageArray.count>0) {
-        [self.btnAlbum setTitle:[NSString stringWithFormat:@"发送（%@张）",@(self.selectedImageArray.count)] forState:UIControlStateNormal];
-        [self.btnAlbum setTitleColor:[UIColor orangeColor] forState:UIControlStateNormal];
-        btnAlbumActionType = BtnAlbumAction_sendImage;
+    [self changeBtnState];
+}
+
+#pragma mark - 按钮状态改变回调
+-(void)changeBtnState
+{
+    [self.btnPreviewImageConfirm setTitle:[NSString stringWithFormat:@"确认（%@张）",@(self.selectedPhotoObjArray.count)] forState:UIControlStateNormal];
+    if (self.maxSelectedNumber > 0) {
+        if (self.selectedAssetArray.count<self.maxSelectedNumber) {
+            self.btnTokePhoto.enabled = YES;
+            [self.btnTokePhoto setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        }else{
+            self.btnTokePhoto.enabled = NO;
+            [self.btnTokePhoto setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+        }
     }else{
-        [self.btnAlbum setTitle:@"相册" forState:UIControlStateNormal];
-        [self.btnAlbum setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-        btnAlbumActionType = BtnAlbumAction_openAlbum;
+        self.btnTokePhoto.enabled = YES;
+        [self.btnTokePhoto setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     }
+    
 }
 
 #pragma mark - 按钮点击回调
 
+-(void)btnPreviewImageConfirmAction:(UIButton *)sender
+{
+    
+    [self dismissWithCompletion:^{
+        
+    }];
+    if ([self.delegate respondsToSelector:@selector(imagePopupActionView:selectedAsset:)]) {
+        for (PhtotObj *photoObj in self.thisDeSelectedPhotoOjbArray) {
+            for (ALAsset *asset in self.selectedAssetArray) {
+                if ([[photoObj.asset defaultRepresentation].url isEqual:[asset defaultRepresentation].url]) {
+                    [self.selectedAssetArray removeObject:asset];
+                    break;
+                }
+            }
+        }
+        
+        for (PhtotObj *photoObj in self.thisSelectedPhotoOjbArray) {
+            [self.selectedAssetArray addObject:photoObj.asset];
+        }
+        
+        [self.delegate imagePopupActionView:self selectedAsset:self.selectedAssetArray];
+    }
+}
+
 -(void)btnAlbumAction:(UIButton *)sender
 {
-    switch (btnAlbumActionType) {
-        case BtnAlbumAction_openAlbum:
-        {
-            [self dismissWithCompletion:^{
-                
-            }];
+    [self dismissWithCompletion:^{
+        
+    }];
+    if (self.albumAndAssetArray && self.albumAndAssetArray.count>0) {
+        [self showAlbumVc:self.albumAndAssetArray];
+    }else{
+        [BBMAlbumAssetTool getAllAlbumAndAssetsComplete:^(NSArray *dataArray) {
+            self.albumAndAssetArray = dataArray;
+            [self showAlbumVc:self.albumAndAssetArray];
+        } albumAuthorizationFail:^{
             
-            if (self.albumAndAssetArray && self.albumAndAssetArray.count>0) {
-                [self showAlbumVc:self.albumAndAssetArray];
-            }else{
-                [BBMAlbumAssetTool getAllAlbumAndAssetsComplete:^(NSArray *dataArray) {
-                    self.albumAndAssetArray = dataArray;
-                    [self showAlbumVc:self.albumAndAssetArray];
-                } albumAuthorizationFail:^{
-                    
-                }];
-            }
-        }
-            break;
-            
-        case BtnAlbumAction_sendImage:
-        {
-            [self dismissWithCompletion:^{
-                
-            }];
-            if ([self.delegate respondsToSelector:@selector(imagePopupActionView:selectedImage:)]) {
-                NSMutableArray *tempArray = [[NSMutableArray alloc] init];
-                for (PhtotObj *photoObj in self.selectedImageArray) {
-                    [tempArray addObject:[UIImage imageWithCGImage:[photoObj.asset defaultRepresentation].fullScreenImage]];
-                }
-                [self.delegate imagePopupActionView:self selectedImage:tempArray];
-            }
-        }
-            break;
-            
-        default:
-            break;
+        }];
     }
 }
 
 -(void)btnTokePhotoAction:(UIButton *)sender
 {
+    
     if(!self.picker){
         _picker = [[UIImagePickerController alloc] init];//初始化
         _picker.delegate = self;
@@ -379,28 +423,43 @@ static NSString *identity = @"collection_cell";
 #pragma mark - 显示相册VC
 -(void)showAlbumVc:(NSArray *)dataArray
 {
+    NSMutableArray *tempSelectedArray ;
+    if (!self.isDispalySelectedItem || !self.selectedAssetArray){
+        tempSelectedArray = [[NSMutableArray alloc] init];
+    }else{
+        tempSelectedArray = [[NSMutableArray alloc] initWithArray:self.selectedAssetArray];
+    }
+    
     BBMAlbumViewController *albumViewController = [[BBMAlbumViewController alloc] init];
     albumViewController.delegate = self;
-    albumViewController.maxSelectedNumber = self.maxSelectedNumber;
-    
-    BBMPhotosViewController *photoVc = [[BBMPhotosViewController alloc] init];
-    photoVc.delegate = albumViewController;
-    photoVc.maxSelectedNumber = self.maxSelectedNumber;
+    [albumViewController setAssetArray:dataArray selectedAssetArray:tempSelectedArray maxSelectedNumber:self.maxSelectedNumber];
     
     BBMAlbumNavigationController *nav = [[BBMAlbumNavigationController alloc] initWithRootViewController:albumViewController];
-    albumViewController.dataArr = dataArray;
     
     NSArray *tempPhotoArray = ((NSDictionary *)self.albumAndAssetArray[0])[BBMAssetAlbumPhotosArr];
-    NSMutableArray *tempDataArray = [[NSMutableArray alloc] init];
+    
+    NSMutableArray *tempPhotoModelArray = [[NSMutableArray alloc] init];
     for (ALAsset *asset in tempPhotoArray) {
         BBMPhotoModel *photoModel = [[BBMPhotoModel alloc] init];
         photoModel.asset = asset;
-        [tempDataArray addObject:photoModel];
+        [tempPhotoModelArray addObject:photoModel];
+        
+        if (self.isDispalySelectedItem) {
+            for (ALAsset *selectedAsset in self.selectedAssetArray) {
+                if ([[asset defaultRepresentation].url isEqual:[selectedAsset defaultRepresentation].url]) {
+                    photoModel.isSelected = YES;
+                    break;
+                }
+            }
+            
+        }
     }
-    photoVc.dataArr = tempDataArray;
+    
+    BBMPhotosViewController *photoVc = [[BBMPhotosViewController alloc] init];
+    [photoVc setPhotoModelArray:tempPhotoModelArray selectedAssetArray:tempSelectedArray maxSelectedNumber:self.maxSelectedNumber];
+    photoVc.delegate = albumViewController;
     
     [nav pushViewController:photoVc animated:NO];
-//    photoVc.navigationItem.backBarButtonItem.title = @"相册";
     [self.viewController presentViewController:nav animated:YES completion:^{
         
     }];
@@ -415,21 +474,7 @@ static NSString *identity = @"collection_cell";
     if (self.albumAndAssetArray && self.albumAndAssetArray.count>0) {
         [self resumeWholeView];
     }else{
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            [BBMAlbumAssetTool getAllAlbumAndAssetsComplete:^(NSArray *dataArray) {
-                self.albumAndAssetArray = dataArray;
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    NSArray *tempArray = ((NSDictionary *)self.albumAndAssetArray[0])[BBMAssetAlbumPhotosArr];
-                    if (tempArray.count>defaultMaxShowImageNumber) {
-                        [self setImages:[tempArray subarrayWithRange:NSMakeRange(tempArray.count-defaultMaxShowImageNumber, defaultMaxShowImageNumber)]];
-                    }else{
-                        [self setImages:tempArray];
-                    }
-                });
-            } albumAuthorizationFail:^{
-          
-            }];
-        });
+        [self asyncGetAlbumData];
     }
     
     self.contentViewConstraintV.constant = -self.contentView.frame.size.height;
@@ -441,18 +486,52 @@ static NSString *identity = @"collection_cell";
     }];
 }
 
+#pragma mark - 回复原始状态方法
+
 -(void)resumeWholeView
 {
-    [self.selectedImageArray removeAllObjects];
-    for (PhtotObj *photo in self.photoObjArray) {
-        [photo.btnCheck setSelected:NO];
-        [photo dismissCover];
+    if(self.isPreviewImage){
+        if (self.selectedPhotoObjArray) {
+            [self.selectedPhotoObjArray removeAllObjects];
+        }else{
+            self.selectedPhotoObjArray = [[NSMutableArray alloc] init];
+        }
+        
+        if (self.thisSelectedPhotoOjbArray) {
+            [self.thisSelectedPhotoOjbArray removeAllObjects];
+        }else{
+            self.thisSelectedPhotoOjbArray = [[NSMutableArray alloc] init];
+        }
+        
+        for (PhtotObj *photoObj in self.photoObjArray) {
+            [photoObj.btnCheck setSelected:NO];
+            if (self.maxSelectedNumber>0 && self.selectedAssetArray.count >= self.maxSelectedNumber) {
+                [photoObj showCover];
+            }else{
+                [photoObj dismissCover];
+            }
+            for (ALAsset *asset in self.selectedAssetArray) {
+                if ([[asset defaultRepresentation].url isEqual:[photoObj.asset defaultRepresentation].url]) {
+                    [photoObj.btnCheck setSelected:YES];
+                    [photoObj dismissCover];
+                    [self.selectedPhotoObjArray addObject:photoObj];
+                    break;
+                }
+            }
+        }
+       
+        if (self.selectedPhotoObjArray && self.selectedPhotoObjArray.count>0) {
+            PhtotObj *photoObj = self.selectedPhotoObjArray[0];
+            [self.scrollView setContentOffset:CGPointMake(photoObj.imageView.frame.origin.x-5, 0)];
+        }else{
+            [self.scrollView setContentOffset:CGPointMake(0, 0)];
+        }
+        
+    }else{
+        [self.selectedPhotoObjArray removeAllObjects];
+        [self.scrollView setContentOffset:CGPointMake(0, 0)];
     }
-    [self.btnAlbum setTitle:@"相册" forState:UIControlStateNormal];
-    [self.btnAlbum setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    btnAlbumActionType = BtnAlbumAction_openAlbum;
-    
-    [self.scrollView setContentOffset:CGPointMake(0, 0)];
+    [self changeBtnState];
 }
 
 #pragma mark - 控件消失
@@ -469,35 +548,52 @@ static NSString *identity = @"collection_cell";
 }
 
 #pragma mark - BBMAlbumViewControllerDelegate
-- (void)bbmAlbumViewController:(BBMAlbumViewController *)bbmAlbumViewController didSeletedDataArr:(NSArray *)dataArr
+- (void)bbmAlbumViewController:(BBMAlbumViewController *)bbmAlbumViewController didSeletedAssetArrary:(NSArray *)assetArrary
 {
-    if ([self.delegate respondsToSelector:@selector(imagePopupActionView:selectedImage:)]) {
-        [self.delegate imagePopupActionView:self selectedImage:dataArr];
+    if (self.isDispalySelectedItem) {
+        self.selectedAssetArray = [NSMutableArray arrayWithArray:assetArrary];
+    }
+    
+    if ([self.delegate respondsToSelector:@selector(imagePopupActionView:selectedAsset:)]) {
+        [self.delegate imagePopupActionView:self selectedAsset:self.selectedAssetArray];
     }
 }
 
 #pragma mark - UIImagePickerControllerDelegate
 -(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
-    NSLog(@"Picker returned successfully.");
-    UIImage *theImage = nil;
-    // 判断，图片是否允许修改
-    if ([picker allowsEditing]){
-        //获取用户编辑之后的图像
-        theImage = [info objectForKey:UIImagePickerControllerEditedImage];
-    } else {
-        // 照片的元数据参数
-        theImage = [info objectForKey:UIImagePickerControllerOriginalImage];
+    UIImage *image = [info valueForKey:UIImagePickerControllerOriginalImage];
+    //保存到相册
+    UIImageWriteToSavedPhotosAlbum(image, self, @selector(image:didFinishSavingWithError:contextInfo:), nil);
+}
+
+- (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo
+{
+    [BBMAlbumAssetTool getAllAlbumAndAssetsComplete:^(NSArray *dataArray) {
+        self.albumAndAssetArray = dataArray;
+        NSArray *tempArray = ((NSDictionary *)self.albumAndAssetArray[0])[BBMAssetAlbumPhotosArr];
+        if (self.isPreviewImage) {
+            if (tempArray.count>defaultMaxShowImageNumber) {
+                [self setImages:[tempArray subarrayWithRange:NSMakeRange(0, defaultMaxShowImageNumber)]];
+            }else{
+                [self setImages:tempArray];
+            }
+        }
+        ALAsset *myasset = tempArray[0];
         
-    }
-    
-    if ([self.delegate respondsToSelector:@selector(imagePopupActionView:selectedImage:)]) {
-        [self.delegate imagePopupActionView:self tokePhoto:theImage];
-    }
-    
-    [picker dismissViewControllerAnimated:YES completion:^{
+        [self.selectedAssetArray addObject:myasset];
+        
+        if ([self.delegate respondsToSelector:@selector(imagePopupActionView:tokePhotoAsset:)]) {
+            [self.delegate imagePopupActionView:self tokePhotoAsset:myasset];
+        }
+        
+        [self.picker dismissViewControllerAnimated:YES completion:^{
+            
+        }];
+    } albumAuthorizationFail:^{
         
     }];
+
 }
 
 @end

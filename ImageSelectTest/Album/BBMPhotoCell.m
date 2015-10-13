@@ -88,7 +88,7 @@
     }else{
         self.btn.selected = NO;
     }
-    
+
     self.coverView.hidden = !photoModel.isCover;
 }
 

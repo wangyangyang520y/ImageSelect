@@ -6,9 +6,9 @@
 //  Copyright (c) 2014年 ZengJianYuan. All rights reserved.
 //
 
-#import "PhotoBrowseView.h"
+#import "AlbumPhotoBrowseView.h"
 
-@interface PhotoBrowseView ()
+@interface AlbumPhotoBrowseView ()
 {
     CGRect screenFrame;
     float prePosition;
@@ -24,14 +24,14 @@
 
 @property(nonatomic,strong)NSMutableArray *visiblePhotoViews;
 
-@property(nonatomic,strong)PhotoView *reusePhotoView;
-@property(nonatomic,strong)PhotoView *currentPhotoView;
+@property(nonatomic,strong)AssetPhotoView *reusePhotoView;
+@property(nonatomic,strong)AssetPhotoView *currentPhotoView;
 
 @property(nonatomic,strong) void(^tapGestureCallBackBlock)();
 
 @end
 
-@implementation PhotoBrowseView
+@implementation AlbumPhotoBrowseView
 
 
 -(id)initWithFrame:(CGRect)frame
@@ -94,7 +94,7 @@
 -(void)showPhotoViewAtIndex:(NSInteger)index
 {
     CGRect photoViewFrame = CGRectMake(index*screenFrame.size.width+photoPadding, 0, screenFrame.size.width-2*photoPadding, screenFrame.size.height);
-    PhotoView *photoView = [[PhotoView alloc]initWithFrame:photoViewFrame];
+    AssetPhotoView *photoView = [[AssetPhotoView alloc]initWithFrame:photoViewFrame];
     photoView.delegate = self;
     photoView.tapGestureCallBackBlock = self.tapGestureCallBackBlock;
     [self.photoScrollView addSubview:photoView];
@@ -116,8 +116,6 @@
 //复用photoView调用的方法，复用时只改变photoView的位置和内容
 -(void)showReusePhotoViewAtIndex:(NSInteger)index
 {
-
-    
     CGRect photoViewFrame = CGRectMake(index*screenFrame.size.width+photoPadding, 0, screenFrame.size.width-2*photoPadding, screenFrame.size.height);
     //在两头的时候不需要复用photoView
     if (index<self.photoArray.count&&index>=0) {
@@ -156,12 +154,12 @@
     //判断滚动方向，给index赋不同的值
     if (scrollView.contentOffset.x>prePosition) {//向右边滚动
         index=ceilf(CGRectGetMinX(visibleBounds)/CGRectGetWidth(visibleBounds));
-        if(self.scrollToImageCallBackBlock && scrollView.contentOffset.x>index*CGRectGetWidth(visibleBounds)-CGRectGetWidth(visibleBounds)/2){
+        if(self.scrollToImageCallBackBlock && scrollView.contentOffset.x>index*CGRectGetWidth(visibleBounds)-CGRectGetWidth(visibleBounds)/2){//滚动到二分之一处事更新按钮状态
             self.scrollToImageCallBackBlock(index);
         }
     }else{
         index=floorf(CGRectGetMinX(visibleBounds)/CGRectGetWidth(visibleBounds));
-        if(self.scrollToImageCallBackBlock && scrollView.contentOffset.x<index*CGRectGetWidth(visibleBounds)+CGRectGetWidth(visibleBounds)/2){
+        if(self.scrollToImageCallBackBlock && scrollView.contentOffset.x<index*CGRectGetWidth(visibleBounds)+CGRectGetWidth(visibleBounds)/2){//滚动到二分之一处事更新按钮状态
             self.scrollToImageCallBackBlock(index);
         }
     }
@@ -239,16 +237,16 @@
 
 -(UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView
 {
-    if ([scrollView isKindOfClass:[PhotoView class]]) {
-        return ((PhotoView *)scrollView).imageView;
+    if ([scrollView isKindOfClass:[AssetPhotoView class]]) {
+        return ((AssetPhotoView *)scrollView).imageView;
     }
     return nil;
 }
 
 - (void)scrollViewDidZoom:(UIScrollView *)scrollView
 {
-    if ([scrollView isKindOfClass:[PhotoView class]]) {
-        PhotoView *temp = (PhotoView *)scrollView;
+    if ([scrollView isKindOfClass:[AssetPhotoView class]]) {
+        AssetPhotoView *temp = (AssetPhotoView *)scrollView;
         CGRect tempRect = temp.imageView.frame;
         
         float x;

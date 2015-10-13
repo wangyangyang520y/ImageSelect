@@ -6,7 +6,7 @@
 //  Copyright (c) 2014年 ZengJianYuan. All rights reserved.
 //
 
-#import "PhotoView.h"
+#import "AssetPhotoView.h"
 
 #define start @"start"
 #define running @"running"
@@ -14,12 +14,12 @@
 #define fail @"failure"
 
 
-@interface PhotoView ()
+@interface AssetPhotoView ()
 
 
 @end
 
-@implementation PhotoView
+@implementation AssetPhotoView
 
 -(id)initWithFrame:(CGRect)frame
 {

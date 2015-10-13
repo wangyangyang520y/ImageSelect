@@ -7,9 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		75EF75451BCA5BEA00FE27B1 /* BBMAlbumBrowseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 75EF75401BCA5BEA00FE27B1 /* BBMAlbumBrowseViewController.m */; };
-		75EF75461BCA5BEA00FE27B1 /* PhotoBrowseView.m in Sources */ = {isa = PBXBuildFile; fileRef = 75EF75421BCA5BEA00FE27B1 /* PhotoBrowseView.m */; };
-		75EF75471BCA5BEA00FE27B1 /* PhotoView.m in Sources */ = {isa = PBXBuildFile; fileRef = 75EF75441BCA5BEA00FE27B1 /* PhotoView.m */; };
 		75EF754B1BCAA55300FE27B1 /* ImagePopupActionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 75EF754A1BCAA55300FE27B1 /* ImagePopupActionView.m */; };
 		FC6E3A5A1BC791CA009DEA94 /* BBMAlbumCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FC6E3A4C1BC791CA009DEA94 /* BBMAlbumCell.m */; };
 		FC6E3A5B1BC791CA009DEA94 /* BBMAlbumNavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = FC6E3A4E1BC791CA009DEA94 /* BBMAlbumNavigationController.m */; };
@@ -26,6 +23,9 @@
 		FCB720731BC606DB0030F96E /* ImageSelectTestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FCB720721BC606DB0030F96E /* ImageSelectTestTests.m */; };
 		FCB720901BC64FFA0030F96E /* checked@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FCB7208E1BC64FFA0030F96E /* checked@2x.png */; };
 		FCB720911BC64FFA0030F96E /* unchecked@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FCB7208F1BC64FFA0030F96E /* unchecked@2x.png */; };
+		FCBC81B71BCBDD36006AF7DF /* AlbumPhotoBrowseView.m in Sources */ = {isa = PBXBuildFile; fileRef = FCBC81B21BCBDD36006AF7DF /* AlbumPhotoBrowseView.m */; settings = {ASSET_TAGS = (); }; };
+		FCBC81B81BCBDD36006AF7DF /* AssetPhotoView.m in Sources */ = {isa = PBXBuildFile; fileRef = FCBC81B41BCBDD36006AF7DF /* AssetPhotoView.m */; settings = {ASSET_TAGS = (); }; };
+		FCBC81B91BCBDD36006AF7DF /* BBMAlbumBrowseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FCBC81B61BCBDD36006AF7DF /* BBMAlbumBrowseViewController.m */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,12 +39,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		75EF753F1BCA5BEA00FE27B1 /* BBMAlbumBrowseViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BBMAlbumBrowseViewController.h; sourceTree = "<group>"; };
-		75EF75401BCA5BEA00FE27B1 /* BBMAlbumBrowseViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BBMAlbumBrowseViewController.m; sourceTree = "<group>"; };
-		75EF75411BCA5BEA00FE27B1 /* PhotoBrowseView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoBrowseView.h; sourceTree = "<group>"; };
-		75EF75421BCA5BEA00FE27B1 /* PhotoBrowseView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoBrowseView.m; sourceTree = "<group>"; };
-		75EF75431BCA5BEA00FE27B1 /* PhotoView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoView.h; sourceTree = "<group>"; };
-		75EF75441BCA5BEA00FE27B1 /* PhotoView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoView.m; sourceTree = "<group>"; };
 		75EF75491BCAA55300FE27B1 /* ImagePopupActionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImagePopupActionView.h; sourceTree = "<group>"; };
 		75EF754A1BCAA55300FE27B1 /* ImagePopupActionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImagePopupActionView.m; sourceTree = "<group>"; };
 		FC6E3A4B1BC791CA009DEA94 /* BBMAlbumCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BBMAlbumCell.h; sourceTree = "<group>"; };
@@ -77,6 +71,12 @@
 		FCB7207F1BC606DB0030F96E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FCB7208E1BC64FFA0030F96E /* checked@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "checked@2x.png"; sourceTree = "<group>"; };
 		FCB7208F1BC64FFA0030F96E /* unchecked@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "unchecked@2x.png"; sourceTree = "<group>"; };
+		FCBC81B11BCBDD36006AF7DF /* AlbumPhotoBrowseView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlbumPhotoBrowseView.h; path = ../../../../svn/trunk/BBMSDK/BBMSDK/CustomView/BBMImageSelector/AssetBrowse/AlbumPhotoBrowseView.h; sourceTree = "<group>"; };
+		FCBC81B21BCBDD36006AF7DF /* AlbumPhotoBrowseView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AlbumPhotoBrowseView.m; path = ../../../../svn/trunk/BBMSDK/BBMSDK/CustomView/BBMImageSelector/AssetBrowse/AlbumPhotoBrowseView.m; sourceTree = "<group>"; };
+		FCBC81B31BCBDD36006AF7DF /* AssetPhotoView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AssetPhotoView.h; path = ../../../../svn/trunk/BBMSDK/BBMSDK/CustomView/BBMImageSelector/AssetBrowse/AssetPhotoView.h; sourceTree = "<group>"; };
+		FCBC81B41BCBDD36006AF7DF /* AssetPhotoView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AssetPhotoView.m; path = ../../../../svn/trunk/BBMSDK/BBMSDK/CustomView/BBMImageSelector/AssetBrowse/AssetPhotoView.m; sourceTree = "<group>"; };
+		FCBC81B51BCBDD36006AF7DF /* BBMAlbumBrowseViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BBMAlbumBrowseViewController.h; path = ../../../../svn/trunk/BBMSDK/BBMSDK/CustomView/BBMImageSelector/AssetBrowse/BBMAlbumBrowseViewController.h; sourceTree = "<group>"; };
+		FCBC81B61BCBDD36006AF7DF /* BBMAlbumBrowseViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BBMAlbumBrowseViewController.m; path = ../../../../svn/trunk/BBMSDK/BBMSDK/CustomView/BBMImageSelector/AssetBrowse/BBMAlbumBrowseViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,12 +101,12 @@
 		75EF753E1BCA5BEA00FE27B1 /* AssetBrowse */ = {
 			isa = PBXGroup;
 			children = (
-				75EF753F1BCA5BEA00FE27B1 /* BBMAlbumBrowseViewController.h */,
-				75EF75401BCA5BEA00FE27B1 /* BBMAlbumBrowseViewController.m */,
-				75EF75411BCA5BEA00FE27B1 /* PhotoBrowseView.h */,
-				75EF75421BCA5BEA00FE27B1 /* PhotoBrowseView.m */,
-				75EF75431BCA5BEA00FE27B1 /* PhotoView.h */,
-				75EF75441BCA5BEA00FE27B1 /* PhotoView.m */,
+				FCBC81B11BCBDD36006AF7DF /* AlbumPhotoBrowseView.h */,
+				FCBC81B21BCBDD36006AF7DF /* AlbumPhotoBrowseView.m */,
+				FCBC81B31BCBDD36006AF7DF /* AssetPhotoView.h */,
+				FCBC81B41BCBDD36006AF7DF /* AssetPhotoView.m */,
+				FCBC81B51BCBDD36006AF7DF /* BBMAlbumBrowseViewController.h */,
+				FCBC81B61BCBDD36006AF7DF /* BBMAlbumBrowseViewController.m */,
 			);
 			path = AssetBrowse;
 			sourceTree = "<group>";
@@ -317,18 +317,18 @@
 			files = (
 				FCB720601BC606DB0030F96E /* ViewController.m in Sources */,
 				FC6E3A5A1BC791CA009DEA94 /* BBMAlbumCell.m in Sources */,
-				75EF75461BCA5BEA00FE27B1 /* PhotoBrowseView.m in Sources */,
 				FC6E3A5F1BC791CA009DEA94 /* BBMPhotosViewController.m in Sources */,
 				FC6E3A5E1BC791CA009DEA94 /* BBMPhotoModel.m in Sources */,
+				FCBC81B81BCBDD36006AF7DF /* AssetPhotoView.m in Sources */,
 				FC6E3A601BC791CA009DEA94 /* BBMAlbumAssetTool.m in Sources */,
 				FC6E3A5B1BC791CA009DEA94 /* BBMAlbumNavigationController.m in Sources */,
-				75EF75451BCA5BEA00FE27B1 /* BBMAlbumBrowseViewController.m in Sources */,
+				FCBC81B91BCBDD36006AF7DF /* BBMAlbumBrowseViewController.m in Sources */,
 				75EF754B1BCAA55300FE27B1 /* ImagePopupActionView.m in Sources */,
 				FC6E3A5D1BC791CA009DEA94 /* BBMPhotoCell.m in Sources */,
 				FCB7205D1BC606DB0030F96E /* AppDelegate.m in Sources */,
 				FC6E3A5C1BC791CA009DEA94 /* BBMAlbumViewController.m in Sources */,
+				FCBC81B71BCBDD36006AF7DF /* AlbumPhotoBrowseView.m in Sources */,
 				FCB7205A1BC606DB0030F96E /* main.m in Sources */,
-				75EF75471BCA5BEA00FE27B1 /* PhotoView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

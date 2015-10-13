@@ -17,7 +17,9 @@ static BBMPhotosViewController *photoVc;
 
 @interface BBMAlbumViewController ()
 @property(nonatomic, strong)UITableView *myTableView;
-
+@property(nonatomic, strong)NSArray *assetArray;
+@property(nonatomic,strong) NSMutableArray *selectedAssetArray;
+@property(nonatomic,assign) NSInteger  maxSelectedNumber;
 @end
 
 @implementation BBMAlbumViewController
@@ -33,10 +35,16 @@ static BBMPhotosViewController *photoVc;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+
     [self setupNav];
-    
     [self setupSubviews];
+}
+
+-(void)setAssetArray:(NSArray *)assetArray selectedAssetArray:(NSMutableArray *)selectedAssetArray maxSelectedNumber:(NSInteger)maxSelectedNumber
+{
+    self.assetArray = assetArray;
+    self.selectedAssetArray = selectedAssetArray;
+    self.maxSelectedNumber = maxSelectedNumber;
 }
 
 - (void)setupNav
@@ -49,6 +57,7 @@ static BBMPhotosViewController *photoVc;
  */
 - (void)back
 {
+    [self.selectedAssetArray removeAllObjects];
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
@@ -60,20 +69,22 @@ static BBMPhotosViewController *photoVc;
     self.myTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [self.view addSubview:self.myTableView];
     
+    self.title = @"相册";
+    
 }
 
 #pragma mark - UITableViewDelegate
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return self.dataArr.count;
+    return self.assetArray.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     BBMAlbumCell *cell = [BBMAlbumCell cellWithTableView:tableView];
     
-    cell.dataDic = self.dataArr[indexPath.row];
+    cell.dataDic = self.assetArray[indexPath.row];
     
     return cell;
 }
@@ -85,33 +96,39 @@ static BBMPhotosViewController *photoVc;
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    BBMPhotosViewController *photosViewController = [[BBMPhotosViewController alloc] init];
-    
-    if (self.maxSelectedNumber>0) {
-        photosViewController.maxSelectedNumber = self.maxSelectedNumber;
-    }
-    photosViewController.delegate = self;
-    
-    NSArray *assetArray = ((NSDictionary *)self.dataArr[indexPath.row])[BBMAssetAlbumPhotosArr];
-    NSMutableArray *dataArrM = [NSMutableArray array];
+    NSArray *assetArray = ((NSDictionary *)self.assetArray[indexPath.row])[BBMAssetAlbumPhotosArr];
+    NSMutableArray *tempArray = [NSMutableArray array];
     for (ALAsset *asset in assetArray) {
         BBMPhotoModel *photoModel = [[BBMPhotoModel alloc] init];
         photoModel.asset = asset;
-        [dataArrM addObject:photoModel];
+        [tempArray addObject:photoModel];
+        
+//        if ([self.selectedAssetArray containsObject:asset]) {
+//            photoModel.isSelected = YES;
+//        }
+        for (ALAsset *selectedAsset in self.selectedAssetArray) {
+            if ([[selectedAsset defaultRepresentation].url isEqual:[asset defaultRepresentation].url]) {
+                photoModel.isSelected = YES;
+            }
+        }
     }
-    photosViewController.dataArr = dataArrM;
+    
+    BBMPhotosViewController *photosViewController = [[BBMPhotosViewController alloc] init];
+    
+    if (!self.selectedAssetArray) {
+        self.selectedAssetArray = [[NSMutableArray alloc] init];
+    }
+    
+    [photosViewController setPhotoModelArray:tempArray selectedAssetArray:self.selectedAssetArray maxSelectedNumber:self.maxSelectedNumber];
+    photosViewController.delegate = self;
     [self.navigationController pushViewController:photosViewController animated:YES];
 }
 
 #pragma mark - BBMPhotosViewControllerDelegate
-- (void)bbmPhotosViewController:(BBMPhotosViewController *)bbmPhotosViewController didSeletedDataArr:(NSArray *)dataArr
+- (void)bbmPhotosViewController:(BBMPhotosViewController *)bbmPhotosViewController didSelectedAssetArray:(NSArray *)assetArray
 {
-    NSMutableArray *tempImageArray = [[NSMutableArray alloc] init];
-    for (ALAsset *asset in dataArr) {
-        [tempImageArray addObject:[UIImage imageWithCGImage:[[asset defaultRepresentation] fullResolutionImage]]];
-    }
-    if (self.delegate && [self.delegate respondsToSelector:@selector(bbmAlbumViewController:didSeletedDataArr:)]) {
-        [self.delegate bbmAlbumViewController:self didSeletedDataArr:tempImageArray];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(bbmAlbumViewController:didSeletedAssetArrary:)]) {
+        [self.delegate bbmAlbumViewController:self didSeletedAssetArrary:assetArray];
     }
 }
 

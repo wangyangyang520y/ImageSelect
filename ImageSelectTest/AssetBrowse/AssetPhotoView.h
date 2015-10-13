@@ -11,7 +11,7 @@
 @class PhotoView;
 @class BrowsePhoto;
 
-@interface PhotoView : UIScrollView
+@interface AssetPhotoView : UIScrollView
 
 @property(nonatomic,strong)BrowsePhoto *photo;
 @property(nonatomic,assign) CGRect imageOriginFrame;

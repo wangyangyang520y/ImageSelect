@@ -1,21 +1,30 @@
 {
   "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "ABD028B8055EFF20C7DEB98E0A84CA90A8774BC4",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+    "2c62a703-af8e-4afe-8e7f-aade0dc79d17++3813" : {
 
+    }
   },
   "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
     "ABD028B8055EFF20C7DEB98E0A84CA90A8774BC4" : 0,
+    "2c62a703-af8e-4afe-8e7f-aade0dc79d17++3813" : 0,
     "FF9BB3ADB350D7EB007AE69F02A68DEB59EEAA8A" : 0
   },
   "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "624B2CAE-DA0A-4342-B0EB-7CB5699D8D64",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
     "ABD028B8055EFF20C7DEB98E0A84CA90A8774BC4" : "ImageSelect\/",
+    "2c62a703-af8e-4afe-8e7f-aade0dc79d17++3813" : "..\/svn\/trunk",
     "FF9BB3ADB350D7EB007AE69F02A68DEB59EEAA8A" : "ImageSelectTest"
   },
   "DVTSourceControlWorkspaceBlueprintNameKey" : "ImageSelectTest",
   "DVTSourceControlWorkspaceBlueprintVersion" : 204,
   "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "ImageSelectTest.xcodeproj",
   "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "svn:\/\/yangyang.wang@123.57.136.152\/babamai",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Subversion",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "2c62a703-af8e-4afe-8e7f-aade0dc79d17++3813"
+    },
     {
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/wangyangyang520y\/ImageSelect.git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
