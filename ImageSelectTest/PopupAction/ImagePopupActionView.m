@@ -100,7 +100,7 @@ static NSString *identity = @"collection_cell";
                     }else{
                         [self setImages:tempArray];
                     }
-                    
+                    [self changeBtnState];
                 });
             }
         } albumAuthorizationFail:^{
@@ -499,6 +499,19 @@ static NSString *identity = @"collection_cell";
     }];
 }
 
+#pragma mark - 控件消失
+-(void)dismissWithCompletion:(void(^)())completion
+{
+    self.contentViewConstraintV.constant = 0;
+    [UIView animateWithDuration:0.25 animations:^{
+        self.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.0];
+        [self layoutIfNeeded];
+    } completion:^(BOOL finished) {
+        [self removeFromSuperview];
+        completion();
+    }];
+}
+
 #pragma mark - 回复原始状态方法
 
 -(void)resumeWholeView
@@ -552,18 +565,7 @@ static NSString *identity = @"collection_cell";
     [self changeBtnState];
 }
 
-#pragma mark - 控件消失
--(void)dismissWithCompletion:(void(^)())completion
-{
-    self.contentViewConstraintV.constant = 0;
-    [UIView animateWithDuration:0.25 animations:^{
-        self.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.0];
-        [self layoutIfNeeded];
-    } completion:^(BOOL finished) {
-        [self removeFromSuperview];
-        completion();
-    }];
-}
+
 
 #pragma mark - BBMAlbumViewControllerDelegate
 - (void)bbmAlbumViewController:(BBMAlbumViewController *)bbmAlbumViewController didSeletedAssetArrary:(NSArray *)assetArrary
@@ -581,6 +583,13 @@ static NSString *identity = @"collection_cell";
     UIImage *image = [info valueForKey:UIImagePickerControllerOriginalImage];
     //保存到相册
     UIImageWriteToSavedPhotosAlbum(image, self, @selector(image:didFinishSavingWithError:contextInfo:), nil);
+}
+
+-(void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
+{
+    if ([self.delegate respondsToSelector:@selector(imagePickerControllerDidCancel:)]) {
+        [self.delegate imagePickerControllerDidCancel:picker];
+    }
 }
 
 - (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo

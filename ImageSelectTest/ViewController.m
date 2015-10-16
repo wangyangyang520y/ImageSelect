@@ -53,11 +53,6 @@
     self.popup1.isDispalySelectedItem = NO;
     self.popup1.delegate = self;
     
-    
-    self.popup2 = [[ImagePopupActionView alloc] initWithFrame:[UIScreen mainScreen].bounds withViewController:self previewImage:YES];
-    self.popup2.maxSelectedNumber = 5;
-    self.popup2.isDispalySelectedItem = NO;
-    self.popup2.delegate = self;
 }
 
 -(void)btn1Action:(UIButton *)sender
@@ -70,6 +65,11 @@
 
 -(void)btn2Action:(UIButton *)sender
 {
+    
+    self.popup2 = [[ImagePopupActionView alloc] initWithFrame:[UIScreen mainScreen].bounds withViewController:self previewImage:YES];
+    self.popup2.maxSelectedNumber = 5;
+    self.popup2.isDispalySelectedItem = NO;
+    self.popup2.delegate = self;
     [self.popup2 showWithCompletion:^{
         
     }];

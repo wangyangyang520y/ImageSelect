@@ -12,9 +12,9 @@
 
 @protocol ImagePopupActionViewDelegate <NSObject>
 
-//-(void)imagePopupActionView:(ImagePopupActionView *)actionView tokePhotoAsset:(ALAsset *)asset;
-
 -(void)imagePopupActionView:(ImagePopupActionView *)actionView selectedAsset:(NSArray *)assetArray;
+
+-(void)imagePickerControllerDidCancel:(UIImagePickerController *)picker;
 
 @end
 
